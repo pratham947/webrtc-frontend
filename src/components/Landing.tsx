@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import Room from "./Room";
 import { Button } from "./ui/button";
-import { useTheme } from "@/components/theme-provider";
+// import { useTheme } from "@/components/theme-provider";
 import Home from "./Home";
 
 const Landing = () => {
-  const [name, setName] = useState<string>("");
+  // const [name, setName] = useState<string>("");
   const [localVideoTrack, setLocalVideoTrack] =
     useState<MediaStreamTrack | null>(null);
   const [localAudioTrack, setLocalAudioTrack] =

@@ -12,12 +12,16 @@ const Room = ({
   localVideoTrack: MediaStreamTrack | null;
   localAudioTrack: MediaStreamTrack | null;
 }) => {
+  // @ts-ignore
   const [senderPc, setSenderPc] = useState<RTCPeerConnection | null>(null);
+  // @ts-ignore
   const [recievingPc, setRecievingPc] = useState<RTCPeerConnection | null>(
     null
   );
+  // @ts-ignore
   const [remoteVideoStream, setRemoteVideoStream] =
     useState<MediaStreamTrack | null>();
+  // @ts-ignore
   const [remoteAudioStream, SetRemoteAudioStream] =
     useState<MediaStreamTrack | null>();
 
