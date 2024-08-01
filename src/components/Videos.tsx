@@ -1,8 +1,7 @@
-import React, { MutableRefObject } from "react";
+import { MutableRefObject } from "react";
 import Message from "./Message";
 
 const Videos = ({
-  localVideo,
   remoteVideo,
   socket,
   roomId
@@ -15,6 +14,7 @@ const Videos = ({
   return (
     <div>
       <div>
+        {/* @ts-ignore */}
         <video ref={remoteVideo} />
       </div>
       <div>
