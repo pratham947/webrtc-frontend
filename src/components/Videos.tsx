@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect} from "react";
+import { MutableRefObject, useEffect } from "react";
 import Message from "./Message";
 import Draggable from "react-draggable";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -32,7 +32,7 @@ const Videos = ({
             <>
               <div className="w-full h-full">
                 <video
-                 {/* @ts-ignore */}
+                  // @ts-ignore
                   ref={remoteVideo}
                   className="w-full h-full object-cover"
                 />
