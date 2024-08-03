@@ -16,7 +16,7 @@ const Message = ({
 
   const [message, setMessage] = useRecoilState(IncomingMessages);
 
-  const messageRef = useRef<HTMLElement | null>(null);
+  const messageRef = useRef<HTMLElement>(null);
 
   const sendMessage = (e: any) => {
     e.preventDefault();
