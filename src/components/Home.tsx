@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "./ui/button";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import Reviews from "./Reviews";

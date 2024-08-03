@@ -31,8 +31,8 @@ const Videos = ({
           {isStarted ? (
             <>
               <div className="w-full h-full">
-                {/* @ts-ignore */}
                 <video
+                 {/* @ts-ignore */}
                   ref={remoteVideo}
                   className="w-full h-full object-cover"
                 />
@@ -58,6 +58,7 @@ const Videos = ({
           )}
           <Draggable bounds="parent">
             <div className="absolute w-[150px] left-0 top-0">
+              {/* @ts-ignore */}
               <video ref={localVideo} className="w-full h-full object-cover" />
             </div>
           </Draggable>
