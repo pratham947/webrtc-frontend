@@ -38,7 +38,7 @@ const Room = ({
 
   useEffect(() => {
     const WS_URL =
-      "http://ec2-15-206-149-190.ap-south-1.compute.amazonaws.com:8080/";
+      "https://discounted-knew-hierarchy-rainbow.trycloudflare.com";
     const ws = new WebSocket(WS_URL);
     ws.onopen = () => {
       console.log("connected");
