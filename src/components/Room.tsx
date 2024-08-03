@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Videos from "./Videos";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { IncomingMessages } from "@/store/atoms/Message";
+import { isConnected } from "@/store/atoms/Connection";
 
 const Room = ({
   name,
@@ -31,10 +32,14 @@ const Room = ({
   const remoteVideoref = useRef<HTMLVideoElement>();
   const localVideoref = useRef<HTMLVideoElement>();
 
-  const [Message, setMessage] = useRecoilState(IncomingMessages);
+  const setConnection = useSetRecoilState(isConnected);
+
+  const setMessage = useSetRecoilState(IncomingMessages);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080");
+    const WS_URL =
+      "http://ec2-15-206-149-190.ap-south-1.compute.amazonaws.com:8080/";
+    const ws = new WebSocket(WS_URL);
     ws.onopen = () => {
       console.log("connected");
       setSocket(ws);
@@ -47,6 +52,7 @@ const Room = ({
         const pc = new RTCPeerConnection();
         setSenderPc(pc);
         setRoomId(message.roomId);
+        setConnection(true);
 
         if (localVideoTrack) {
           pc.addTrack(localVideoTrack);
@@ -157,21 +163,46 @@ const Room = ({
       } else if (message.type == "message") {
         setMessage((prevMessages) => [
           ...prevMessages,
-          {message : message.IncomingMessage,time : message.time},
+          {
+            message: message.IncomingMessage,
+            time: message.time,
+            messageType: message.messageType,
+          },
         ]);
+      } else if (message.type == "disconnected") {
+        setConnection(false);
       }
+    };
+    const userDisconnected = () => {
+      ws.send(
+        JSON.stringify({
+          type: "disconnected",
+          roomId: roomId,
+          socket: socket,
+        })
+      );
+      ws.close();
+    };
+    window.addEventListener("beforeunload", userDisconnected);
+    return () => {
+      window.removeEventListener("beforeunload", userDisconnected);
+      userDisconnected();
     };
   }, [name]);
 
   useEffect(() => {
     if (localVideoTrack && localVideoref.current) {
-      localVideoref.current.srcObject = new MediaStream([localVideoTrack]);
+      // @ts-ignore
+      localVideoref.current.srcObject = new MediaStream([
+        localVideoTrack,
+        localAudioTrack,
+      ]);
       localVideoref.current.play();
     }
   }, [localVideoTrack, localAudioTrack]);
 
   return (
-    <div>
+    <div className="w-full h-screen">
       <Videos
         socket={socket}
         localVideo={localVideoref}
