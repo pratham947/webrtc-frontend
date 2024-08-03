@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from "react";
+import { MutableRefObject, useEffect} from "react";
 import Message from "./Message";
 import Draggable from "react-draggable";
 import { useRecoilValue, useSetRecoilState } from "recoil";

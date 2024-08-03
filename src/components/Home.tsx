@@ -4,7 +4,6 @@ import { StarFilledIcon } from "@radix-ui/react-icons";
 import Reviews from "./Reviews";
 import Query from "./Query";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
 
 const Home = () => {
   const navigate = useNavigate();

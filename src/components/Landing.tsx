@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Room from "./Room";
 import { Button } from "./ui/button";
 // import { useTheme } from "@/components/theme-provider";
-import Home from "./Home";
-import { PlayIcon, SpeakerLoudIcon, VideoIcon } from "@radix-ui/react-icons";
+import {  SpeakerLoudIcon, VideoIcon } from "@radix-ui/react-icons";
 import { Input } from "./ui/input";
 
 const Landing = () => {

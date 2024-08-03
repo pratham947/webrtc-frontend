@@ -1,5 +1,4 @@
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import React from "react";
 import { Button } from "./ui/button";
 import { useTheme } from "./theme-provider";
 import { useNavigate } from "react-router-dom";
