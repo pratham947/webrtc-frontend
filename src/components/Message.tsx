@@ -16,7 +16,7 @@ const Message = ({
 
   const [message, setMessage] = useRecoilState(IncomingMessages);
 
-  const messageRef = useRef<HTMLElement>(null);
+  const messageRef = useRef<HTMLVideoElement>(null);
 
   const sendMessage = (e: any) => {
     e.preventDefault();
@@ -53,6 +53,7 @@ const Message = ({
       <div className="p-5">
         <p className="font-Montserrat text-2xl font-bold">Messages</p>
       </div>
+      {/*  @ts-ignore */}
       <div ref={messageRef} className="p-5 h-4/6 overflow-auto">
         {message.map(({ message, messageType }) => (
           <div
@@ -64,7 +65,9 @@ const Message = ({
           >
             <p>{message}</p>
             {messageType == "me" && (
-                <p className="text-xs item text-end">{messageType == "me" && "me"}</p>
+              <p className="text-xs item text-end">
+                {messageType == "me" && "me"}
+              </p>
             )}
           </div>
         ))}
