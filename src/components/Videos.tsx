@@ -45,6 +45,7 @@ const Videos = ({
               </h4>
               <RotatingLines
                 visible={true}
+                // @ts-ignore
                 height="96"
                 width="96"
                 color="grey"
