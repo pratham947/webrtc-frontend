@@ -11,13 +11,13 @@ const Reviews = () => {
                 <img src="https://avatar.iran.liara.run/public/boy" />
               </div>
               <div>
-                <p className="font-Montserrat">Pratham mehta</p>
-                <p className="font-Montserrat">Gadha</p>
+                <p className="font-Montserrat">Dummy user</p>
+                <p className="font-Montserrat">anonyms</p>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="font-Montserrat">One of the best product i have used</p>
+            <p className="font-Montserrat">Connect-wave is a great product</p>
           </CardContent>
         </Card>
       ))}

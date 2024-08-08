@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { useRecoilState } from "recoil";
 import { IncomingMessages } from "@/store/atoms/Message";
-import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { PaperPlaneIcon, FileIcon } from "@radix-ui/react-icons";
 import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
+import { Label } from "@radix-ui/react-label";
 
 const Message = ({
   socket,
@@ -21,8 +23,6 @@ const Message = ({
   const sendMessage = (e: any) => {
     e.preventDefault();
     if (text.length == 0) return;
-    console.log("hello");
-
     socket?.send(
       JSON.stringify({
         type: "send-message",
@@ -42,6 +42,27 @@ const Message = ({
     setText("");
   };
 
+  const handleFileChange = async (e: any) => {
+    e.preventDefault();
+    const file: File = e.target.files[0];
+    console.log(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (socket && socket.readyState == WebSocket.OPEN) {
+        console.log(reader.result);
+        socket.send(
+          JSON.stringify({
+            type: "file",
+            fileName: file.name,
+            // @ts-ignore
+            fileData: new Uint8Array(reader.result),
+          })
+        );
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
   useEffect(() => {
     if (messageRef.current) {
       messageRef.current.scrollTop = messageRef.current?.scrollHeight;
@@ -54,7 +75,7 @@ const Message = ({
         <p className="font-Montserrat text-2xl font-bold">Messages</p>
       </div>
       {/*  @ts-ignore */}
-      <div ref={messageRef} className="p-5 h-4/6 overflow-auto">
+      <div ref={messageRef} className="p-5 h-4/6 overflow-y-auto">
         {message.map(({ message, messageType }) => (
           <div
             className={`${
@@ -73,17 +94,31 @@ const Message = ({
         ))}
       </div>
       <div className="flex gap-5 p-3">
-        <Textarea
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Message..."
-          className="font-Montserrat"
-          value={text}
-          onKeyDown={(e) => {
-            if (e.key == "Enter" && e.shiftKey == false) {
-              sendMessage(e);
-            }
-          }}
-        />
+        <div className="w-5/6 p-2 flex gap-2 border-2 border-white rounded-md">
+          <div>
+            <Label htmlFor="File">
+              <FileIcon />
+            </Label>
+            <Input
+              id="File"
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+          <Textarea
+            onChange={(e) => setText(e.target.value)}
+            style={{ boxShadow: "none", outline: "none" }}
+            placeholder="Message..."
+            className="font-Montserrat border-none outline-none focus:outline-none focus:ring-0"
+            value={text}
+            onKeyDown={(e) => {
+              if (e.key == "Enter" && e.shiftKey == false) {
+                sendMessage(e);
+              }
+            }}
+          />
+        </div>
         <Button onClick={sendMessage}>
           <PaperPlaneIcon />
         </Button>

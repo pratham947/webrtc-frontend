@@ -1,8 +1,10 @@
-import  { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Videos from "./Videos";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { IncomingMessages } from "@/store/atoms/Message";
 import { isConnected } from "@/store/atoms/Connection";
+import { AudioTrack } from "@/store/atoms/AudioTrack";
+import { VideoTrack } from "@/store/atoms/VideoTrack";
 
 const Room = ({
   name,
@@ -27,7 +29,7 @@ const Room = ({
     useState<MediaStreamTrack | null>();
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [roomId, setRoomId] = useState<string>("");
+  const roomIdRef = useRef<string>("");
 
   const remoteVideoref = useRef<HTMLVideoElement>();
   const localVideoref = useRef<HTMLVideoElement>();
@@ -36,9 +38,12 @@ const Room = ({
 
   const setMessage = useSetRecoilState(IncomingMessages);
 
+  const allowAudio = useRecoilValue(AudioTrack);
+
+  const allowVideo = useRecoilValue(VideoTrack);
+
   useEffect(() => {
-    const WS_URL =
-      "ws://ec2-15-206-149-190.ap-south-1.compute.amazonaws.com";
+    const WS_URL = "ws://ec2-52-66-199-115.ap-south-1.compute.amazonaws.com";
     const ws = new WebSocket(WS_URL);
     ws.onopen = () => {
       console.log("connected");
@@ -51,7 +56,7 @@ const Room = ({
       if (message.type == "create-offer") {
         const pc = new RTCPeerConnection();
         setSenderPc(pc);
-        setRoomId(message.roomId);
+        roomIdRef.current = message.roomId;
         setConnection(true);
 
         if (localVideoTrack) {
@@ -135,8 +140,10 @@ const Room = ({
             setRemoteVideoStream(track2);
             SetRemoteAudioStream(track1);
           }
+
           // @ts-ignore
           remoteVideoref.current?.srcObject.addTrack(track1);
+
           // @ts-ignore
           remoteVideoref.current?.srcObject.addTrack(track2);
 
@@ -177,11 +184,21 @@ const Room = ({
       ws.send(
         JSON.stringify({
           type: "disconnected",
-          roomId: roomId,
+          roomId: roomIdRef,
           socket: socket,
         })
       );
       ws.close();
+
+      if (senderPc) {
+        senderPc.close();
+        setSenderPc(null);
+      }
+
+      if (recievingPc) {
+        recievingPc.close();
+        setRecievingPc(null);
+      }
     };
     window.addEventListener("beforeunload", userDisconnected);
     return () => {
@@ -190,16 +207,16 @@ const Room = ({
     };
   }, [name]);
 
+  console.log(localVideoTrack, localAudioTrack);
+
   useEffect(() => {
-    if (localVideoTrack && localVideoref.current) {
-      // @ts-ignore
-      localVideoref.current.srcObject = new MediaStream([
-        localVideoTrack,
-        localAudioTrack,
-      ]);
+    if (localVideoref.current) {
+      localVideoref.current.srcObject = new MediaStream();
+      if (localVideoTrack && allowVideo)
+        localVideoref.current.srcObject.addTrack(localVideoTrack);
       localVideoref.current.play();
     }
-  }, [localVideoTrack, localAudioTrack]);
+  }, [localVideoTrack, localAudioTrack, allowVideo, allowAudio]);
 
   return (
     <div className="w-full h-screen">
@@ -207,7 +224,7 @@ const Room = ({
         socket={socket}
         localVideo={localVideoref}
         remoteVideo={remoteVideoref}
-        roomId={roomId}
+        roomId={roomIdRef.current}
       />
     </div>
   );

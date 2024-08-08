@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import Room from "./Room";
 import { Button } from "./ui/button";
 // import { useTheme } from "@/components/theme-provider";
-import {  SpeakerLoudIcon, VideoIcon } from "@radix-ui/react-icons";
+import { SpeakerLoudIcon, VideoIcon } from "@radix-ui/react-icons";
 import { Input } from "./ui/input";
+import { useRecoilState } from "recoil";
+import { AudioTrack } from "@/store/atoms/AudioTrack";
+import { VideoTrack } from "@/store/atoms/VideoTrack";
 
 const Landing = () => {
   // const [name, setName] = useState<string>("");
@@ -14,25 +17,40 @@ const Landing = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [joined, setJoined] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
-  const [allowVideo, setallowVideo] = useState<boolean>(true);
-  const [allowAudio, setAllowAudio] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
+  const [allowVideo, setAllowVideo] = useRecoilState(VideoTrack);
+  const [allowAudio, setAllowAudio] = useRecoilState(AudioTrack);
+
+  console.log(allowVideo, allowAudio);
 
   const getCam = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: allowVideo,
-      audio: allowAudio,
+      audio: {
+        noiseSuppression : true,
+        echoCancellation : true,
+        autoGainControl : true
+      },
     });
     streamRef.current = stream;
 
-    const videoTrack = stream.getVideoTracks()[0];
-    const audioTrack = stream.getAudioTracks()[0];
+    let audioTrack;
+    let videoTrack;
 
-    setLocalVideoTrack(videoTrack || null)
-    setLocalAudioTrack(audioTrack || null)
+    if (allowVideo) videoTrack = stream.getVideoTracks()[0];
+    if (allowAudio) audioTrack = stream.getAudioTracks()[0];
+
+    setLocalVideoTrack(stream.getVideoTracks()[0]);
+    setLocalAudioTrack(stream.getAudioTracks()[0]);
 
     if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+      videoRef.current.srcObject = new MediaStream();
+      if (audioTrack) {
+        videoRef.current.srcObject.addTrack(audioTrack);
+      }
+      if (videoTrack) {
+        videoRef.current.srcObject.addTrack(videoTrack);
+      }
       videoRef.current.play();
     }
   };
@@ -47,7 +65,24 @@ const Landing = () => {
         streamRef.current = null;
       }
     };
-  }, [videoRef, allowVideo, allowAudio]);
+  }, [videoRef, allowVideo]);
+
+  useEffect(() => {
+    setAllowAudio(true);
+    setAllowVideo(true);
+  }, []);
+
+  useEffect(() => {
+    if (!allowAudio && localAudioTrack && videoRef.current) {
+      streamRef.current?.removeTrack(localAudioTrack);
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play();
+    } else if (allowAudio && localAudioTrack && videoRef.current) {
+      streamRef.current?.addTrack(localAudioTrack);
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current?.play();
+    }
+  }, [allowAudio]);
 
   if (!joined) {
     return (
@@ -66,7 +101,7 @@ const Landing = () => {
               className={`w-12 h-12 ${
                 allowVideo ? "bg-white" : "bg-red-700"
               } rounded-full flex justify-center items-center cursor-pointer`}
-              onClick={() => setallowVideo((video) => !video)}
+              onClick={() => setAllowVideo((video) => !video)}
             >
               <VideoIcon width={30} height={30} color="black" />
             </div>
@@ -87,7 +122,9 @@ const Landing = () => {
               onChange={(e) => setName(e.target.value)}
               className="my-2 w-[300px]"
             />
-            <p className="text-sm font-Montserrat mb-5 text-gray-700">Name should be greater than 2 characters</p>
+            <p className="text-sm font-Montserrat mb-5 text-gray-700">
+              Name should be greater than 2 characters
+            </p>
             <p className="font-Montserrat text-lg">Ready to Meet ?</p>
             <Button
               className="bg-[#1e40af] hover:bg-[#1e3a8a] text-white p-7 my-5 w-[180px] font-Montserrat"
